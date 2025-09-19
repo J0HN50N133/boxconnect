@@ -1,11 +1,10 @@
-# Detect available container runtime
-CONTAINER_CMD := $(shell which podman || which docker || echo "none")
+# Use Podman as container runtime
+CONTAINER_CMD := podman
 
 check-container:
-	@if [ "$(CONTAINER_CMD)" = "none" ]; then \
-		echo "Error: Neither podman nor docker found. Please install one of them:"; \
+	@if ! command -v podman >/dev/null 2>&1; then \
+		echo "Error: podman not found. Please install podman:"; \
 		echo "  - To install podman: https://podman.io/getting-started/installation"; \
-		echo "  - To install docker: https://docs.docker.com/get-docker/"; \
 		exit 1; \
 	fi
 
@@ -15,10 +14,11 @@ build: check-container
 
 vpn: check-container
 	$(CONTAINER_CMD) run --rm -it \
+		--network slirp4netns \
 		-e SERVER=$(SERVER) \
 		-e USERNAME=$(USERNAME) \
 		-e PASSWORD=$(PASSWORD) \
 		-v $(HOME)/.ssh:/root/.ssh \
-		--cap-add=NET_ADMIN \
 		--device /dev/net/tun \
+		--cap-add=NET_ADMIN \
 		openconnect
