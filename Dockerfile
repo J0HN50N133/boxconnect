@@ -1,6 +1,6 @@
-FROM debian:11-slim
+FROM alpine:3.19
 
-RUN apt-get update && apt-get install -y openconnect openssh-client procps && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache openconnect openssh-client procps bash curl
 
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
